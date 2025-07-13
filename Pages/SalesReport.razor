@@ -1,0 +1,143 @@
+﻿@page "/sales-report"
+@using ErpApp.DTO
+@using ErpApp.Models
+@using ErpApp.Services
+@inject ReportService ReportService
+@inject ReportPdfGenerator PdfGenerator
+@inject IWebHostEnvironment Env
+
+<a style="display:none" @ref="pdfLinkRef"></a>
+
+<h3>Sales Report</h3>
+
+<div class="mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" @bind="selectedCategory">
+                <option value="">-- All Categories --</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">From Date</label>
+            <input type="date" class="form-control" @bind="fromDate" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">To Date</label>
+            <input type="date" class="form-control" @bind="toDate" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Min. Quantity</label>
+            <input type="number" class="form-control" @bind="minQuantity" min="0" />
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-primary" @onclick="GenerateReport">Generate</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(currentLinq))
+{
+    <div class="mb-2">
+        <strong>LINQ Query:</strong>
+        <pre style="white-space: pre-wrap; word-break: break-word;">@currentLinq</pre>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(currentSql))
+{
+    <div class="mb-2">
+        <strong>Generated SQL:</strong>
+        <pre style="white-space: pre-wrap; word-break: break-word;">@currentSql</pre>
+    </div>
+}
+
+<div class="col-md-2">
+    <button class="btn btn-outline-danger" @onclick="ExportToPdf" disabled="@(!results?.Any() ?? true)">
+        Export to PDF
+    </button>
+</div>
+
+
+@if (results is not null)
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Total Sold</th>
+                    <th>Total Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in results)
+                {
+                    <tr>
+                        <td>@row.Name</td>
+                        <td>@row.Category</td>
+                        <td>@row.TotalSold</td>
+                        <td>@row.TotalRevenue.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<string> categories = new();
+    private string? selectedCategory;
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private int minQuantity = 0;
+
+    private List<ProductReportDto>? results;
+    private string? currentLinq;
+    private string? currentSql;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await ReportService.GetAllCategoriesAsync();
+    }
+
+    private async Task GenerateReport()
+    {
+        var report = await ReportService.GetSalesReportAsync(
+            selectedCategory,
+            fromDate,
+            toDate,
+            minQuantity
+        );
+
+        results = report.Data;
+        currentSql = report.Sql;
+        currentLinq = report.Linq;
+    }
+
+    private ElementReference pdfLinkRef;
+    private string? downloadUrl;
+
+    private async Task ExportToPdf()
+    {
+        if (results is null || !results.Any())
+            return;
+
+        var pdfBytes = PdfGenerator.GenerateSalesReport(results);
+
+        var fileName = $"sales-report-{DateTime.Now:yyyyMMddHHmmss}.pdf";
+        var filePath = Path.Combine(Env.WebRootPath, "exports", fileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+        await File.WriteAllBytesAsync(filePath, pdfBytes);
+
+        downloadUrl = $"/exports/{fileName}";
+
+        await JS.InvokeVoidAsync("triggerDownload", downloadUrl);
+    }
+
+    [Inject] IJSRuntime JS { get; set; } = default!;
+}

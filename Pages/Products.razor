@@ -1,0 +1,90 @@
+﻿@page "/products"
+@using ErpApp.Services
+@using ErpApp.Models
+@inject ProductService ProductService
+
+<h3>Product Report</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="LoadAll">All Products</button>
+    <button class="btn btn-success me-2" @onclick="LoadTop10ByDemand">Top 10 by Demand</button>
+    <button class="btn btn-warning" @onclick="LoadTop10ByPrice">Top 10 by Price</button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(currentLinq))
+{
+    <div class="mb-2" style="max-width: 100%; overflow-x: auto;">
+        <strong>LINQ Query:</strong>
+        <pre>@currentLinq</pre>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(currentSql))
+{
+    <div class="mb-2">
+        <strong>Generated SQL:</strong>
+        <pre>@currentSql</pre>
+    </div>
+}
+
+@if (products is null)
+{
+    <p>Select a report above to view results.</p>
+}
+else if (!products.Any())
+{
+    <p>No results found.</p>
+}
+else
+{
+    <div class="table-responsive" style="max-width: 100%; overflow-x: auto;">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in products)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.Category</td>
+                        <td>@p.Price.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Product>? products;
+    private string? currentLinq;
+    private string? currentSql;
+
+    private async Task LoadAll()
+    {
+        var result = await ProductService.GetAllProductsWithSqlAsync();
+        products = result.Products;
+        currentSql = result.Sql;
+        currentLinq = result.Linq;
+    }
+
+    private async Task LoadTop10ByDemand()
+    {
+        var result = await ProductService.GetTop10ByDemandAsync();
+        products = result.Products;
+        currentSql = result.Sql;
+        currentLinq = result.Linq;
+    }
+
+    private async Task LoadTop10ByPrice()
+    {
+        var result = await ProductService.GetTop10ByPriceAsync();
+        products = result.Products;
+        currentSql = result.Sql;
+        currentLinq = result.Linq;
+    }
+}
