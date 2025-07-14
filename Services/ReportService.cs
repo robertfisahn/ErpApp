@@ -1,11 +1,17 @@
 ﻿using ErpApp.Data;
 using ErpApp.DTO;
+using ErpApp.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace ErpApp.Services
 {
-    public class ReportService(ErpDbContext _context)
+    public class ReportService
     {
+        private readonly ErpDbContext _context;
+        public ReportService(IDbContextResolver resolver)
+        {
+            _context = resolver.GetContext();
+        }
         public async Task<(List<ProductReportDto> Data, string Sql, string Linq)> GetSalesReportAsync(
             string? category,
             DateTime? from,

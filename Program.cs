@@ -1,16 +1,21 @@
 using ErpApp.Data;
+using ErpApp.Interfaces;
 using ErpApp.Services;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF;
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<ErpDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerDbConnection")));
+builder.Services.AddDbContext<OracleDbContext>(options =>
+    options.UseOracle(builder.Configuration.GetConnectionString("OracleDbConnection")));
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddSingleton<DbContextSelectorService>();
+builder.Services.AddScoped<IDbContextResolver, DbContextResolver>();
+
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddSingleton<ReportPdfGenerator>();
@@ -19,8 +24,11 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ErpDbContext>();
-    await ErpDbSeeder.SeedAllAsync(dbContext);
+    var sqlServerDbContext = scope.ServiceProvider.GetRequiredService<SqlServerDbContext>();
+    await DbSeeder.SeedAllAsync(sqlServerDbContext);
+
+    var oracleDbContext = scope.ServiceProvider.GetRequiredService<OracleDbContext>();
+    await OracleDbSeeder.SeedAsync(oracleDbContext);
 }
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

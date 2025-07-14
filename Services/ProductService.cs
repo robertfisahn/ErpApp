@@ -1,13 +1,17 @@
 ﻿using ErpApp.Data;
+using ErpApp.Interfaces;
 using ErpApp.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ErpApp.Services;
 
-public class ProductService(ErpDbContext context)
+public class ProductService
 {
-    private readonly ErpDbContext _context = context;
-
+    private readonly ErpDbContext _context;
+    public ProductService(IDbContextResolver resolver)
+    {
+        _context = resolver.GetContext();
+    }
     public async Task<(List<Product> Products, string Sql, string Linq)> GetAllProductsWithSqlAsync()
     {
         var query = _context.Products
