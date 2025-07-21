@@ -1,0 +1,589 @@
+﻿@page "/data"
+@using ErpApp.Services
+@using ErpApp.Models
+@inject DataService DataService
+@inject DbContextSelectorService DbSelector
+
+<style>
+    .data-container {
+        width: 1100px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 89vh;
+        background: white;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin-bottom: 2rem;
+    }
+
+    .db-switch-section {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .db-switch-label {
+        font-size: 1.1rem;
+        color: #334155;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .db-switch {
+        display: inline-flex;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f1f5f9;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .db-switch-btn {
+        border: none;
+        padding: 0.8rem 1.6rem;
+        font-size: 1rem;
+        font-weight: 600;
+        background: none;
+        cursor: pointer;
+        color: #475569;
+        transition: background 0.25s, color 0.25s;
+    }
+
+        .db-switch-btn.selected {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+    .controls-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .control-btn {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border: none;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .control-btn.secondary {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+            .control-btn.secondary:hover {
+                box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+            }
+
+        .control-btn.tertiary {
+            background: linear-gradient(135deg, #ea580c, #f59e0b);
+        }
+
+            .control-btn.tertiary:hover {
+                box-shadow: 0 8px 25px rgba(234, 88, 12, 0.3);
+            }
+
+    .query-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .query-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .query-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        }
+
+    .query-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .query-content {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #334155;
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        border: 1px solid #e2e8f0;
+    }
+
+    .results-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .results-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .results-count {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: white;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.95rem;
+    }
+
+        .modern-table th {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            .modern-table th:first-child {
+                border-top-left-radius: 12px;
+            }
+
+            .modern-table th:last-child {
+                border-top-right-radius: 12px;
+            }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .modern-table tbody tr:hover td {
+            background: #f8fafc;
+            transform: scale(1.01);
+        }
+
+        .modern-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    .price-cell {
+        font-weight: 600;
+        color: #059669;
+        font-size: 1.1rem;
+    }
+
+    .category-badge {
+        background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+        color: #475569;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
+    @@media (max-width: 768px) {
+        .data-container
+
+    {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .query-section {
+        grid-template-columns: 1fr;
+    }
+
+    .results-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    }
+</style>
+
+<div class="data-container">
+    <div class="page-header">
+        <h1 class="page-title">Data Explorer</h1>
+        <p class="page-subtitle">Browse and analyze data from multiple databases with real-time query generation.</p>
+    </div>
+
+    <div class="db-switch-section">
+        <div class="db-switch-label">Choose Database</div>
+        <div class="db-switch">
+            <button class="db-switch-btn @(DbSelector.Current == "mssql" ? "selected" : "")" @onclick='() => SwitchDb("mssql")'>SQL Server</button>
+            <button class="db-switch-btn @(DbSelector.Current == "oracle" ? "selected" : "")" @onclick='() => SwitchDb("oracle")'>Oracle</button>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <div class="controls-grid">
+            <button class="control-btn" @onclick="LoadAll" disabled="@isLoading">
+                @if (isLoading && currentOperation == "all")
+                {
+                    <div class="loading-spinner"></div>
+                }
+                else
+                {
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                }
+                All Products
+            </button>
+            <button class="control-btn secondary" @onclick="LoadTop10ByDemand" disabled="@isLoading">
+                @if (isLoading && currentOperation == "demand")
+                {
+                    <div class="loading-spinner"></div>
+                }
+                else
+                {
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" /></svg>
+                }
+                Top 10 by Demand
+            </button>
+            <button class="control-btn tertiary" @onclick="LoadTop10ByPrice" disabled="@isLoading">
+                @if (isLoading && currentOperation == "price")
+                {
+                    <div class="loading-spinner"></div>
+                }
+                else
+                {
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91 2.28.6 4.18 1.58 4.18 3.91 0 1.82-1.33 2.96-3.12 3.16z" /></svg>
+                }
+                Top 10 by Price
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(currentLinq) || !string.IsNullOrWhiteSpace(currentSql))
+    {
+        <div class="query-section fade-in">
+            @if (!string.IsNullOrWhiteSpace(currentLinq))
+            {
+                <div class="query-card">
+                    <div class="query-title">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" /></svg>
+                        LINQ Query
+                    </div>
+                    <div class="query-content">@currentLinq</div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(currentSql))
+            {
+                <div class="query-card">
+                    <div class="query-title">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4zM4 9v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9c0 2.21-3.58 4-8 4s-8-1.79-8-4zm0 5v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3c0 2.21-3.58 4-8 4s-8-1.79-8-4z" /></svg>
+                        Generated SQL
+                    </div>
+                    <div class="query-content">@currentSql</div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="results-section">
+        <div class="results-header">
+            <div class="results-title">
+                @if (products is null)
+                {
+                    <span>Results</span>
+                }
+                else
+                {
+                    <span>Product Data</span>
+                }
+            </div>
+            @if (products?.Any() == true)
+            {
+                <div class="results-count">
+                    @products.Count @(products.Count == 1 ? "Product" : "Products")
+                </div>
+            }
+        </div>
+
+        @if (products is null)
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <h3>Ready to Explore</h3>
+                <p>Select a report above to view comprehensive analytics.</p>
+            </div>
+        }
+        else if (!products.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3>No Results Found</h3>
+                <p>Try adjusting your search criteria</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-container fade-in">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in products)
+                        {
+                            <tr>
+                                <td><strong>@product.Name</strong></td>
+                                <td><span class="category-badge">@product.Category</span></td>
+                                <td><span class="price-cell">@product.Price.ToString("C")</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Product>? products;
+    private string? currentLinq;
+    private string? currentSql;
+    private bool isLoading = false;
+    private string currentOperation = "";
+
+    private async Task LoadAll()
+    {
+        await ExecuteWithLoading("all", async () =>
+        {
+            var result = await DataService.GetAllProductsWithSqlAsync();
+            products = result.Products;
+            currentSql = result.Sql;
+            currentLinq = result.Linq;
+        });
+    }
+
+    private async Task LoadTop10ByDemand()
+    {
+        await ExecuteWithLoading("demand", async () =>
+        {
+            var result = await DataService.GetTop10ByDemandAsync();
+            products = result.Products;
+            currentSql = result.Sql;
+            currentLinq = result.Linq;
+        });
+    }
+
+    private async Task LoadTop10ByPrice()
+    {
+        await ExecuteWithLoading("price", async () =>
+        {
+            var result = await DataService.GetTop10ByPriceAsync();
+            products = result.Products;
+            currentSql = result.Sql;
+            currentLinq = result.Linq;
+        });
+    }
+
+    private async Task ExecuteWithLoading(string operation, Func<Task> action)
+    {
+        isLoading = true;
+        currentOperation = operation;
+        StateHasChanged();
+
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            isLoading = false;
+            currentOperation = "";
+            StateHasChanged();
+        }
+    }
+
+    private void SwitchDb(string db)
+    {
+        DbSelector.Set(db);
+        products = null;
+        currentSql = null;
+        currentLinq = null;
+        StateHasChanged();
+    }
+}

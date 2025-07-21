@@ -1,18 +1,18 @@
 ﻿using ErpApp.Data;
 using ErpApp.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ErpApp.Services;
 
-public class DbContextResolver(SqlServerDbContext sql, OracleDbContext oracle, DbContextSelectorService selector) : IDbContextResolver
+public class DbContextResolver(IServiceProvider sp, DbContextSelectorService selector) : IDbContextResolver
 {
-    private readonly SqlServerDbContext _sql = sql;
-    private readonly OracleDbContext _oracle = oracle;
+    private readonly IServiceProvider _sp = sp;
     private readonly DbContextSelectorService _selector = selector;
 
     public ErpDbContext GetContext() => _selector.Current switch
     {
-        "sql" => _sql,
-        "oracle" => _oracle,
+        "mssql" => _sp.GetRequiredService<SqlServerDbContext>(),
+        "oracle" => _sp.GetRequiredService<OracleDbContext>(),
         _ => throw new InvalidOperationException("Unsupported DB context.")
     };
 }
