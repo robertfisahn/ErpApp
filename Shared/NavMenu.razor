@@ -1,41 +1,210 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ErpApp</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+﻿<nav class="main-navbar">
+    <div class="main-navbar-container">
+        <a class="main-navbar-brand" href="/">ERPApp</a>
+        <ul class="main-navbar-nav">
+            <li>
+                <NavLink href="/data" class="main-nav-link" activeClass="active">
+                    View Data
+                </NavLink>
+            </li>
+            <li class="has-megamenu">
+                <a href="#" class="main-nav-link">Performance Tests ▾</a>
+                <div class="megamenu">
+                    <div class="megamenu-section">
+                        <div class="megamenu-title">Test type</div>
+                        <ul>
+                            <li><NavLink href="/tests/cpu">CPU</NavLink></li>
+                            <li><NavLink href="/tests/memory">Pamięć</NavLink></li>
+                            <li><NavLink href="/tests/io">Dysk / IO</NavLink></li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        </ul>
     </div>
-</div>
+</nav>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="products">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Products
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="sales-report">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Report
-            </NavLink>
-        </div>
-    </nav>
-</div>
+<style>
+    .has-megamenu {
+        position: relative;
+    }
+
+    .megamenu {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: calc(100% + 12px);
+        background: rgba(255,255,255,0.97);
+        box-shadow: 0 12px 40px rgba(80,100,200,0.13), 0 2px 8px rgba(120,121,255,0.07);
+        border-radius: 18px;
+        min-width: 370px;
+        padding: 1.7rem 2rem;
+        z-index: 4000;
+        border: 1.3px solid rgba(100,110,200,0.07);
+        animation: dropdownfade 0.22s cubic-bezier(.5,1.2,.45,1);
+    }
+    @@keyframes dropdownfade {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    }
+
+    .has-megamenu:hover > .megamenu,
+    .has-megamenu:focus-within > .megamenu {
+        display: block;
+    }
+
+    .megamenu-section {
+        min-width: 200px;
+    }
+
+    .megamenu-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.8rem;
+        color: #72789b;
+    }
+
+    .megamenu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .megamenu ul li {
+            margin-bottom: 0.5rem;
+        }
+
+            .megamenu ul li:last-child {
+                margin-bottom: 0;
+            }
+
+    .megamenu a, .megamenu .nav-link {
+        color: #2251c7;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1.06rem;
+        padding: 0.13rem 0.1rem;
+        border-radius: 6px;
+        transition: background 0.13s, color 0.13s;
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+    }
+
+        .megamenu a:hover, .megamenu .nav-link:hover {
+            background: #e4eaff;
+            color: #3f35f5;
+        }
+
+    .main-navbar {
+        width: 100vw;
+        background: linear-gradient(135deg, #667eea99 0%, #764ba299 100%);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 24px rgba(76, 81, 255, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 2000;
+        padding: 0;
+        border-bottom: 1.5px solid rgba(120, 121, 255, 0.14);
+    }
+
+    .main-navbar-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 2rem;
+    }
+
+    .main-navbar-brand {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: color 0.2s;
+        text-shadow: 0 1px 12px rgba(76, 81, 255, 0.12);
+    }
+
+    .main-navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+        .main-navbar-nav li {
+            display: flex;
+            align-items: center;
+        }
+
+    .main-nav-link {
+        text-decoration: none;
+        font-weight: 600;
+        color: #fff;
+        opacity: 0.9;
+        padding: 0.5rem 1.4rem;
+        border-radius: 8px;
+        font-size: 1.08rem;
+        letter-spacing: 0.5px;
+        transition: background 0.18s cubic-bezier(0.2,0.8,0.2,1.1), color 0.2s, box-shadow 0.2s;
+        display: inline-block;
+    }
+
+        .main-nav-link:hover, .main-nav-link.active {
+            color: #fff;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 2px 12px 0 rgba(76,81,255,0.07);
+            opacity: 1;
+            text-shadow: 0 1px 6px rgba(120, 121, 255, 0.15);
+        }
+
+    @@media (max-width: 888px) {
+        .navbar-container
+
+    {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 20px;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        gap: 24px;
+        width: 100%;
+        margin-top: 18px;
+    }
+
+        .navbar-nav li {
+            width: 100%;
+        }
+
+        .navbar-nav .nav-link, .phone-link {
+            font-size: 22px;
+            text-align: left;
+            width: 100%;
+        }
+
+    }
+</style>
 
 @code {
     private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string NavMenuCssClass => collapseNavMenu ? "navbar-collapse collapse" : "navbar-collapse show";
 
     private void ToggleNavMenu()
     {

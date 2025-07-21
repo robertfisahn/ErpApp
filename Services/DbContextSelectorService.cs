@@ -2,7 +2,7 @@
 
 public class DbContextSelectorService
 {
-    private string _current = "sql"; // default
+    private string _current = "mssql";
     public string Current => _current;
 
     public void Set(string dbName)

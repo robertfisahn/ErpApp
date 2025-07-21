@@ -2,6 +2,7 @@ using ErpApp.Data;
 using ErpApp.Interfaces;
 using ErpApp.Services;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<DbContextSelectorService>();
 builder.Services.AddScoped<IDbContextResolver, DbContextResolver>();
+builder.Services.AddMudServices();
 
+builder.Services.AddScoped<DataService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddSingleton<ReportPdfGenerator>();

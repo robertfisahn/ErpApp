@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f5714aee-d2d5-4f7b-be6b-d463a56ff8c0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
+    <PackageReference Include="MudBlazor" Version="8.9.0" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="9.23.90" />
     <PackageReference Include="QuestPDF" Version="2025.7.0" />
   </ItemGroup>
