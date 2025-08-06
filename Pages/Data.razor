@@ -390,6 +390,7 @@
         <div class="db-switch">
             <button class="db-switch-btn @(DbSelector.Current == "mssql" ? "selected" : "")" @onclick='() => SwitchDb("mssql")'>SQL Server</button>
             <button class="db-switch-btn @(DbSelector.Current == "oracle" ? "selected" : "")" @onclick='() => SwitchDb("oracle")'>Oracle</button>
+            <button class="db-switch-btn @(DbSelector.Current == "postgres" ? "selected" : "")" @onclick='() => SwitchDb("postgres")'>Postgres</button>
         </div>
     </div>
 

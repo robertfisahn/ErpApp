@@ -13,6 +13,7 @@ public class DbContextResolver(IServiceProvider sp, DbContextSelectorService sel
     {
         "mssql" => _sp.GetRequiredService<SqlServerDbContext>(),
         "oracle" => _sp.GetRequiredService<OracleDbContext>(),
+        "postgres" => _sp.GetRequiredService<PostgresDbContext>(),
         _ => throw new InvalidOperationException("Unsupported DB context.")
     };
 }
