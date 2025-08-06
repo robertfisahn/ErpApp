@@ -10,6 +10,8 @@ builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerDbConnection")));
 builder.Services.AddDbContext<OracleDbContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("OracleDbConnection")));
+builder.Services.AddDbContext<PostgresDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresDbConnection")));
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -32,6 +34,9 @@ using (var scope = app.Services.CreateScope())
 
     var oracleDbContext = scope.ServiceProvider.GetRequiredService<OracleDbContext>();
     await OracleDbSeeder.SeedAsync(oracleDbContext);
+
+    var postgresDbContext = scope.ServiceProvider.GetRequiredService<PostgresDbContext>();
+    await PostgresDbSeeder.SeedAsync(postgresDbContext);
 }
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
